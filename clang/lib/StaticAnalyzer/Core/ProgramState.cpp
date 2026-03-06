@@ -11,6 +11,13 @@
 //===----------------------------------------------------------------------===//
 
 #include "clang/StaticAnalyzer/Core/PathSensitive/ProgramState.h"
+
+  struct DepthGuard {
+    unsigned &Depth;
+    DepthGuard(unsigned &D) : Depth(D) { ++Depth; }
+    ~DepthGuard() { --Depth; }
+  };
+
 #include "clang/Analysis/CFG.h"
 #include "clang/Basic/JsonSupport.h"
 #include "clang/StaticAnalyzer/Core/PathSensitive/AnalysisManager.h"
@@ -115,6 +122,9 @@ ProgramStateRef ProgramState::bindLoc(Loc LV,
                                       const LocationContext *LCtx,
                                       bool notifyChanges) const {
   ProgramStateManager &Mgr = getStateManager();
+  if (Mgr.RecursionDepth > 1000)
+    return this;
+  DepthGuard DG(Mgr.RecursionDepth);
   ExprEngine &Eng = Mgr.getOwningEngine();
   ProgramStateRef State = makeWithStore(Mgr.StoreMgr->Bind(getStore(), LV, V));
   const MemRegion *MR = LV.getAsRegion();
