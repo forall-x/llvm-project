@@ -500,6 +500,7 @@ private:
 //===----------------------------------------------------------------------===//
 
 class ProgramStateManager {
+  mutable unsigned RecursionDepth = 0;
   friend class ProgramState;
   friend void ProgramStateRelease(const ProgramState *state);
 private:
