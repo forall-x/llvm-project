@@ -18,6 +18,7 @@
 #include "clang/StaticAnalyzer/Core/PathSensitive/DynamicTypeInfo.h"
 #include "clang/StaticAnalyzer/Core/PathSensitive/Environment.h"
 #include "clang/StaticAnalyzer/Core/PathSensitive/ProgramState_Fwd.h"
+#include "clang/StaticAnalyzer/Core/PathSensitive/ProgramStateTrait.h"
 #include "clang/StaticAnalyzer/Core/PathSensitive/SValBuilder.h"
 #include "clang/StaticAnalyzer/Core/PathSensitive/Store.h"
 #include "llvm/ADT/FoldingSet.h"
@@ -283,6 +284,10 @@ public:
   [[nodiscard]] ProgramStateRef BindExpr(const Stmt *S,
                                          const LocationContext *LCtx, SVal V,
                                          bool Invalidate = true) const;
+
+    ProgramStateRef bindLocInternal(Loc location, SVal V,
+                                   const LocationContext *LCtx,
+                                   bool notifyChanges = true) const;
 
   [[nodiscard]] ProgramStateRef bindLoc(Loc location, SVal V,
                                         const LocationContext *LCtx,
@@ -913,4 +918,6 @@ public:
 
 } // end clang namespace
 
+
+REGISTER_TRAIT_WITH_PROGRAMSTATE(RecursionDepth, unsigned)
 #endif

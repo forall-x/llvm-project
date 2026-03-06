@@ -114,6 +114,17 @@ ProgramStateRef ProgramState::bindLoc(Loc LV,
                                       SVal V,
                                       const LocationContext *LCtx,
                                       bool notifyChanges) const {
+  unsigned Depth = get<RecursionDepth>();
+  if (Depth > 1000)
+    return this;
+  ProgramStateRef State = set<RecursionDepth>(Depth + 1);
+  return State->bindLocInternal(LV, V, LCtx, notifyChanges);
+}
+
+ProgramStateRef ProgramState::bindLocInternal(Loc LV,
+                                      SVal V,
+                                      const LocationContext *LCtx,
+                                      bool notifyChanges) const {
   ProgramStateManager &Mgr = getStateManager();
   ExprEngine &Eng = Mgr.getOwningEngine();
   ProgramStateRef State = makeWithStore(Mgr.StoreMgr->Bind(getStore(), LV, V));
